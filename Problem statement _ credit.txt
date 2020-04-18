@@ -1,0 +1,195 @@
+Classify whether application accepted or not using Logistic regression
+
+card
+Factor. Was the application for a credit card accepted?
+
+reports
+Number of major derogatory reports.
+
+age
+Age in years plus twelfths of a year.
+
+income
+Yearly income (in USD 10,000).
+
+share
+Ratio of monthly credit card expenditure to yearly income.
+
+expenditure
+Average monthly credit card expenditure.
+
+owner
+Factor. Does the individual own their home?
+
+selfemp
+Factor. Is the individual self-employed?
+
+dependents
+Number of dependents.
+
+months
+Months living at current address.
+
+majorcards
+Number of major credit cards held.
+
+active
+Number of active credit accounts.
+
+
+
+
+> creditcard <- read.csv("C:/Users/hi/Desktop/excelR/logistic regression/creditcard.csv")
+>   View(creditcard)
+> CD= creditcard[,-1]
+> view(CD)
+> dim(CD)
+[1] 1319   12
+> ?glm
+> MOde_log = glm(formula = CD$card~., family = "binomial", data = CD)
+Warning messages:
+1: glm.fit: algorithm did not converge 
+2: glm.fit: fitted probabilities numerically 0 or 1 occurred 
+> summary(MOde_log)
+
+Call:
+glm(formula = CD$card ~ ., family = "binomial", data = CD)
+
+Deviance Residuals: 
+   Min      1Q  Median      3Q     Max  
+ -8.49    0.00    0.00    0.00    8.49  
+
+Coefficients:
+              Estimate Std. Error    z value Pr(>|z|)    
+(Intercept)  6.610e+14  8.418e+06   78529581   <2e-16 ***
+reports     -5.411e+14  1.436e+06 -376913075   <2e-16 ***
+age          1.015e+12  2.208e+05    4595721   <2e-16 ***
+income      -4.840e+13  1.470e+06  -32917418   <2e-16 ***
+share        1.732e+16  4.353e+07  397938311   <2e-16 ***
+expenditure -7.184e+11  1.568e+04  -45826822   <2e-16 ***
+owneryes     1.262e+11  4.361e+06      28936   <2e-16 ***
+selfempyes   2.868e+14  7.375e+06   38894429   <2e-16 ***
+dependents   2.155e+13  1.619e+06   13313846   <2e-16 ***
+months      -1.194e+12  3.140e+04  -38025935   <2e-16 ***
+majorcards   4.265e+13  4.858e+06    8780075   <2e-16 ***
+active       8.221e+12  3.175e+05   25897563   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance:  1404.6  on 1318  degrees of freedom
+Residual deviance: 13336.2  on 1307  degrees of freedom
+AIC: 13360
+
+Number of Fisher Scoring iterations: 25
+> exp(coef(MOde_log))
+(Intercept)     reports         age      income       share expenditure    owneryes 
+        Inf           0         Inf           0         Inf           0         Inf 
+ selfempyes  dependents      months  majorcards      active 
+        Inf         Inf           0         Inf         Inf
+#From the above conclusion we can see all the co efficient's P- value is less than 0.05 so co efficients are relevant but here the problem is null deviance is less than residual deviance
+so we will try for other methods also to standardise
+> prob = predict(MOde_log,CD,type = "response")
+> cofusion = table(prob >0.5,CD$card)
+> cofusion
+       
+          no  yes
+  FALSE  116    5
+  TRUE   180 1018
+> accuracy = sum(diag(cofusion))/sum(cofusion)
+> accuracy
+[1] 0.8597422
+> pred_value = NULL
+> pred_value = ifelse(prob>=0.5,"yes","no")
+> CD[,"PREDICTED"]= pred_value
+> View(CD)
+> table(CD$PREDICTED)
+
+  no  yes 
+ 121 1198 
+> table(CD$card,CD$PREDICTED)
+     
+        no  yes
+  no   116  180
+  yes    5 1018
+> install.packages("ROCR")
+WARNING: Rtools is required to build R packages but is not currently installed. Please download and install the appropriate version of Rtools before proceeding:
+
+https://cran.rstudio.com/bin/windows/Rtools/
+Installing package into ‘C:/Users/hi/Documents/R/win-library/3.6’
+(as ‘lib’ is unspecified)
+also installing the dependencies ‘bitops’, ‘gtools’, ‘gdata’, ‘caTools’, ‘gplots’
+
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.6/bitops_1.0-6.zip'
+Content type 'application/zip' length 38469 bytes (37 KB)
+downloaded 37 KB
+
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.6/gtools_3.8.1.zip'
+Content type 'application/zip' length 327154 bytes (319 KB)
+downloaded 319 KB
+
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.6/gdata_2.18.0.zip'
+Content type 'application/zip' length 1265356 bytes (1.2 MB)
+downloaded 1.2 MB
+
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.6/caTools_1.18.0.zip'
+Content type 'application/zip' length 330208 bytes (322 KB)
+downloaded 322 KB
+
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.6/gplots_3.0.3.zip'
+Content type 'application/zip' length 595387 bytes (581 KB)
+downloaded 581 KB
+
+trying URL 'https://cran.rstudio.com/bin/windows/contrib/3.6/ROCR_1.0-7.zip'
+Content type 'application/zip' length 203655 bytes (198 KB)
+downloaded 198 KB
+
+package ‘bitops’ successfully unpacked and MD5 sums checked
+package ‘gtools’ successfully unpacked and MD5 sums checked
+package ‘gdata’ successfully unpacked and MD5 sums checked
+package ‘caTools’ successfully unpacked and MD5 sums checked
+package ‘gplots’ successfully unpacked and MD5 sums checked
+package ‘ROCR’ successfully unpacked and MD5 sums checked
+
+The downloaded binary packages are in
+	C:\Users\hi\AppData\Local\Temp\Rtmpk1BnLy\downloaded_packages
+> library(ROCR)
+Loading required package: gplots
+
+Attaching package: ‘gplots’
+
+The following object is masked from ‘package:stats’:
+
+    lowess
+
+Warning messages:
+1: package ‘ROCR’ was built under R version 3.6.3 
+2: package ‘gplots’ was built under R version 3.6.3 
+> ROCRPRED= Predict(prob,CD$card)
+Error in UseMethod("predict") : 
+  no applicable method for 'predict' applied to an object of class "c('double', 'numeric')"
+> ROCRPRED= prediction(prob,CD$card)
+> ?performance
+> ROCRPERF = performance(ROCRPRED,'tpr','fpr')
+> str(ROCRPERF)
+Formal class 'performance' [package "ROCR"] with 6 slots
+  ..@ x.name      : chr "False positive rate"
+  ..@ y.name      : chr "True positive rate"
+  ..@ alpha.name  : chr "Cutoff"
+  ..@ x.values    :List of 1
+  .. ..$ : num [1:3] 0 0.608 1
+  ..@ y.values    :List of 1
+  .. ..$ : num [1:3] 0 0.995 1
+  ..@ alpha.values:List of 1
+  .. ..$ : num [1:3] Inf 1.00 2.22e-16
+> plot(ROCRPERF,colorize= T, text.adj=c(-0.2,1.7))
+> rocr_cutoff= data.frame(cut_off=ROCRPERF@alpha.values[[1]],fpr=ROCRPERF@x.values,tpr=ROCRPERF@y.values)
+> colnames(rocr_cutoff)= c("cut_off","fpr","tpr")
+> View(rocr_cutoff)
+cut_off
+fpr
+tpr
+1	Inf	0.0000000	0.0000000
+2	1.000000e+00	0.6081081	0.9951124
+3	2.220446e-16	1.0000000	1.0000000
